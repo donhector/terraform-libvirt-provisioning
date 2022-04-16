@@ -1,0 +1,23 @@
+### Libvirt server connection details
+libvirt_user = "hector"
+libvirt_host = "xeon.lan"
+
+### General cluster details
+cluster_prefix = "dev-"
+cluster_node_count = 2
+cluster_node_base_image = "debian-11-genericcloud-amd64.qcow2"
+
+### Libvirt network configuration
+net_ipv4_cidr = "10.10.0.0/24"
+net_dns_domain = "home.lab"
+net_dhcp = true
+
+### Cloudinit user-data
+username = "linux"
+password = "$6$AX466qXBLm7JnBkn$JjRgUde0hbGh93.YfqZel5zv.fiVS5t2SJstgagB9hl/0V3mKv36XpN0Md03z.iri7XaqNYS3xJPOc5HoAlIS/"
+groups = "users,sudo"
+ssh_authorized_keys = [ 
+  "ssh-ed25519 YYYYYYYYYYYY your_email@example.com",
+  "ssh-rsa XXXXXXXXXXXX your_email@example.com"
+]
+# NOTE: Password is 'admin' and was genereated with "openssl passwd -6"

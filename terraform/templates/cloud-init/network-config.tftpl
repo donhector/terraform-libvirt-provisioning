@@ -1,0 +1,11 @@
+version: 2
+ethernets:
+  ens3:
+    %{ if dhcp == "true" ~}dhcp4: true
+    %{ else ~}dhcp4: false
+    addresses: [${addresses}]
+    gateway4: ${gateway4}
+    nameservers:
+      addresses: [${nameservers}]
+      search: [${search}]
+    %{ endif }

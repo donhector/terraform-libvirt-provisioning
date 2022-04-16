@@ -1,0 +1,65 @@
+#cloud-config
+preserve_hostname: false
+hostname: ${hostname}
+fqdn: ${fqdn}
+
+timezone: Europe/Madrid
+locale: en_US.UTF-8
+
+users:
+  - name: ${username}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    shell: /bin/bash
+    groups: ${groups}
+    passwd: ${password}
+    ssh_authorized_keys: [${ssh_authorized_keys}]
+
+ssh_pwauth: false
+disable_root: true
+
+growpart:
+  mode: auto
+  devices: ['/']
+
+%{ if dhcp == "false" ~}
+# See https://serverfault.com/a/1098525/379697
+bootcmd:
+  - cloud-init-per once ifdown ifdown ens3
+  - cloud-init-per once bugfix rm /run/network/interfaces.d/ens3
+  - cloud-init-per once ifup ifup ens3
+%{ endif ~}
+
+write_files:
+  - content: |
+      The quick brown fox
+      jumped over the lazy dog
+    path: /home/${username}/test.txt
+    permissions: '0644'
+    owner: ${username}:${username}
+
+packages:
+  - qemu-guest-agent
+  # - locales-all
+  - curl
+  - wget
+  - vim
+  - zip
+  - unzip
+  - tree
+  - ca-certificates
+  - htop
+  - iotop
+  - iftop
+  - iperf3
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+# Yey another another workaround to an odd Debian 11 cloudimage behaviour
+# where qemu-guest-agent service is not automatically started after installation  
+runcmd:
+  - [ systemctl, start, qemu-guest-agent ]
+
+final_message: "The system is finally up, after $UPTIME seconds"

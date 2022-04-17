@@ -30,17 +30,9 @@ bootcmd:
   - cloud-init-per once ifup ifup ens3
 %{ endif ~}
 
-write_files:
-  - content: |
-      The quick brown fox
-      jumped over the lazy dog
-    path: /home/${username}/test.txt
-    permissions: '0644'
-    owner: ${username}:${username}
-
 packages:
   - qemu-guest-agent
-  # - locales-all
+  - locales-all
   - curl
   - wget
   - vim
@@ -57,9 +49,13 @@ package_update: true
 package_upgrade: true
 package_reboot_if_required: true
 
-# Yey another another workaround to an odd Debian 11 cloudimage behaviour
-# where qemu-guest-agent service is not automatically started after installation  
-runcmd:
-  - [ systemctl, start, qemu-guest-agent ]
+# This reboot fixes several issues in Debian/Ubuntu, that otherwise require issuing several commands in 'runcmd` section
+# - qemu agent not started after install (ie. "systemctl start qemu-guest-agent")
+# - dhcp request happens before cloudinit setting the new hostname, so hosts can't be accessed by their new name (ie. "systemctl restart networking || netplan apply")
+power_state:
+    delay: now
+    mode: reboot
+    message: Rebooting for network settings to be fully applied
+    timeout: 2
 
 final_message: "The system is finally up, after $UPTIME seconds"

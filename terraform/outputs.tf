@@ -1,8 +1,10 @@
-# output "metadata" {
-#   # run 'terraform refresh' if not populated
-#   value       = libvirt_domain.node.*
-#   description = "Info about the nodes that were created"
-# }
+# To get a specific output var, run `terraform output <varname>
+# In case not all data got populated, try with "terraform refresh"
+
+output "metadata" {
+  value       = libvirt_domain.node.*
+  description = "Info about the nodes that were created"
+}
 
 output "nodes" {
   value       = libvirt_domain.node.*.name

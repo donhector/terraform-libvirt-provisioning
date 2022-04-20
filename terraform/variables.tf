@@ -87,11 +87,6 @@ variable "net_ipv4_cidr" {
   type        = string
   description = "IPv4 CIDR range to use for the VM cluster network"
   default     = "10.10.0.0/24"
-
-  validation {
-    condition     = can(regex("^([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}/([1-9]|[1-2][0-9]|3[0-2])$", var.net_ipv4_cidr))
-    error_message = "Invalid IPv4 network CIDR."
-  }
 }
 
 variable "net_dns_domain" {

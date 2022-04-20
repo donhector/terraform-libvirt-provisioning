@@ -4,6 +4,7 @@ resource "libvirt_network" "network" {
   mode      = var.net_mode
   bridge    = var.net_bridge
   autostart = true
+
   domain    = var.net_dns_domain
   addresses = [var.net_ipv4_cidr]
 

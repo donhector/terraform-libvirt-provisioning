@@ -1,0 +1,97 @@
+libvirt_connection = {
+  host            = "xeon.lan"
+  user            = "hector"
+  ssh_private_key = "~/.ssh/id_ed25519"
+}
+
+cluster_prefix = "k8s-"
+
+networks = {
+  host = {
+    mode = "bridge"
+    bridge = "br0"
+    addresses = ["192.168.10.0/24"]
+    domain = "lan"
+    offset = 200
+  }
+  cluster = {
+    mode = "nat"
+    domain = "home.lab"
+    addresses = ["10.0.0.0/24"]
+    offset = 100
+    dhcp = {
+      enabled = true
+    }
+    dns = {
+      enabled = true
+      local_only = true
+    }
+  }
+}
+
+nodes = {
+  bastion = {
+    cpu = 1
+    memory = 256
+    disk = 1024 * 1024 * 1024 * 5
+    os = "debian11"
+    nics = {
+      ens3 = {
+        dhcp = false
+        ips = ["10.0.0.2"]
+        mac = "0A:00:00:00:00:02"
+        libvirt_network = "cluster"
+      }
+      ens4 = {
+        dhcp = false
+        ips = ["192.168.10.2"]
+        mac = "0E:00:00:00:00:02"
+        libvirt_network = "host"
+      }
+    }
+  }
+  master = {
+    cpu = 1
+    memory = 1024
+    disk = 1024 * 1024 * 1024 * 5
+    os = "debian11"
+    nics = {
+      ens3 = {
+        # When dhcp is false, then a static ip will be calculated factoring in the network address range and offset, 
+        # unless you provide your desired IP in the 'ips' argument.
+        dhcp = false
+        ips = ["10.0.0.3"]
+        libvirt_network = "cluster"
+      }
+    }
+    user_data = {
+      username = "debian"
+      password = "$6$hYZDnsyICXsIRfks$5S.RaHI8cf4Fr5Gz/WFAb8sFbc8vMT6vnYpGuBjl.Z8xGOs/0ydbh/ifEkxwb/dU8VEvIx1lF9.7nv8Ci9OAU/"
+    }
+  }
+  worker = {
+    cpu = 2
+    memory = 2048
+    # Primary disk size (ie: the one hosting the OS)
+    disk = 1024 * 1024 * 1024 * 5
+    extra_disks = [
+      # First extra disk (ie: /dev/vdb) that will be partitioned+formatted+mounted. ie: For use with Longhorn or as docker image storage
+      { size = 1024 * 1024 * 1024 * 15, mount = "/data" },
+      # Second extra disk (ie: /dev/vdc) that won't be partioned/formatted/mounted. ie For use with openebs mayastor
+      { size = 1024 * 1024 * 1024 * 10}
+    ]
+    # We can choose the OS from the keys in var.download_os_images 
+    os = "ubuntu2204"
+    nics = {
+      ens3 = {
+        dhcp = true
+        libvirt_network = "cluster"
+      }
+    }
+    # We can override individual user data keys from its defaults specified in var.default_user_data
+    user_data = {
+      username = "ubuntu"
+      password = "$6$igQudqAx7QEX8P3O$q2sChj3BxGxVcOPbyi5/s.GJyXAefeQ/mraO2k/qQ8VHOzo4WSw0f94dVaMnTv78e60qDU69p.HGh9JqkPNOW1"
+    }
+  }
+}
